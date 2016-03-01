@@ -1,9 +1,8 @@
-C:\Users\Carl-Johan\IdeaProjects\BachelorThesis\res\omdbMovies.txt
-C:\Users\Carl-Johan\IdeaProjects\BachelorThesis\res\tomatoes.txt
+C:\Users\Carl-Johan\IdeaProjects\LargeScaleGraphProcessing\src\main\resources\omdbMovies.txt
+C:\Users\Carl-Johan\IdeaProjects\LargeScaleGraphProcessing\src\main\resources\tomatoes.txt
 # Compiled source #
 ###################
 *.com
-../target/classes/Movie.class
 *.dll
 *.exe
 *.o
