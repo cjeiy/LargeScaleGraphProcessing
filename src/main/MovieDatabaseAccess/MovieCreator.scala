@@ -29,7 +29,6 @@ class MovieCreator() {
   var key2: String = ""
   addMovieAttributes()
   splitAndIndexize()
-  print("hej")
 
 
   def addMovieAttributes(): Unit = {
@@ -45,10 +44,6 @@ class MovieCreator() {
     }
     }
   }
-  /// FIXA SPLIT FUNKTION FÖR CAST O GENRE
-
-
-
 
   def splitAndIndexize(): Unit = {
     var j = 30
@@ -66,25 +61,7 @@ class MovieCreator() {
             this.Genres += (splitGenre(i) -> j2)
             movie.Genre = movie.Genre + j2 + " "
             j2 += 1}
-
         }
-      /*} catch {
-        case NotArray =>
-          if (!(knownActorsAndGenre.exists(_._2 == movie.Genre))) {
-
-            this.knownActorsAndGenre += (movie.Genre -> j)
-            movie.Genre.concat(j + " ")
-            j += 1
-
-          } else {
-            val index = this.knownActorsAndGenre.get(movie.Genre)
-            movie.Genre.concat(index + " ")
-          }
-*/
-
-
-
-          //try {
             val splitCast = movie.Cast.split(", ")
             movie.Cast = ""
             for (i <- 0 to splitCast.size - 1) {
@@ -100,28 +77,8 @@ class MovieCreator() {
                   }
 
               }
-          /*} catch {
-            case NotArray =>
-              if (!(knownActorsAndGenre.exists(_._2 == movie.Cast))) {
-
-                this.knownActorsAndGenre += (movie.Cast -> j)
-                movie.Cast.concat(j + " ")
-                j += 1
-
-              } else {
-                val index = this.knownActorsAndGenre.get(movie.Cast)
-                movie.Cast.concat(index + " ")
-              }
-
-
-          }*/
       }
     }
-
-
-
-
-
 
 
 
