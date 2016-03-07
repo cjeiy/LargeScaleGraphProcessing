@@ -2,13 +2,15 @@ package MovieDatabaseAccess
 
 import java.util.NoSuchElementException
 
+import org.apache.spark.graphx.VertexId
+
 import scala.io.Source
 
 object run {
 
   def main(args: Array[String]) {
     val mov=new MovieCreator()
-
+    val graph=new GraphCreator(mov.Actors, mov.Genres, mov.map)
   }
 }
 
@@ -19,6 +21,39 @@ object Done extends Exception{
 object NotArray extends Exception{
 
 }
+
+
+ class GraphCreator(val actors:scala.collection.mutable.HashMap[String,Int], val genres:scala.collection.mutable.HashMap[String,Int], val movies:scala.collection.mutable.HashMap[String,Movie]){
+
+  val Actors = actors
+  val Genres = genres
+  val Movies = movies
+  //val vertices:Array[(VertexId,(Int))]
+
+
+
+
+// TODO: Should possible be done in earlier stage, how to map given ID in Actors -> VertexID?
+  def createVertices(): Unit ={
+    for(actor<-this.Actors.keys){
+
+    }
+    
+
+  }
+
+
+  //TODO: Link VertexId's
+  def createEdges(): Unit ={
+
+
+  }
+
+
+
+}
+
+
 
 class MovieCreator() {
   var map = scala.collection.mutable.HashMap.empty[String, Movie]
@@ -37,7 +72,7 @@ class MovieCreator() {
 
     try{
         if((liist(12).toDouble>5)&&(liist(13).toDouble>1000)) // IMDB RATING / VOTE
-          this.map += (liist(2) -> new Movie(liist))}
+          this.map += (liist(2) -> new Movie(liist,))}
     catch {
       case ioob: IndexOutOfBoundsException => print(ioob)
       case nfe: NumberFormatException => //if (!(liist(12).isEmpty) || (!(liist(13).isEmpty ))){print(nfe)}
@@ -119,7 +154,7 @@ class MovieCreator() {
 }
 
 ///FIRST APPROACH
-class Movie(list:Array[String]) {
+class Movie(list:Array[String], vertex: VertexId) {
   val ID     = list(0)
   val ImdbID = list(1)
   val Title = list(2)
@@ -141,6 +176,7 @@ class Movie(list:Array[String]) {
   val Country = list(18)
   val Awards = list(19)
   val lastUpdated = list(20)
+  val vertexId:VertexId = vertex
 
   def getTitle: String ={
      Title
