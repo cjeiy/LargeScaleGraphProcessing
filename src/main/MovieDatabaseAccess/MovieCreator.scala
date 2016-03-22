@@ -47,6 +47,7 @@ object run {
       val path = g.findPath(sssp,destId,sourceId,mov.idMovie)
 
       val size = path.size
+      println(path.iterator)
       path.remove(0)
       path.remove(size-2)
       val i = 2
@@ -71,6 +72,7 @@ object run {
           println(reversedDirectors(asd.toString.toDouble.toInt))
         catch {case noSuchElementException: NoSuchElementException => }
       }
+
 
       println("")
       println("")
@@ -324,10 +326,15 @@ class MovieCreator() {
     }
 
   def findMovieId(a:Int): Int ={
+    var mov1Id = ArrayBuffer.empty[(String,Long)]
     println("Movie "+ a+ ": ")
     println("")
-    val mov1 = Console.readLine
-    val mov1Id = this.lookUpMovie(mov1)
+    while(mov1Id.isEmpty){
+      val mov1 = Console.readLine
+      mov1Id = this.lookUpMovie(mov1)
+      if (mov1Id.isEmpty)
+        println("Movie Could not be found. Try a different format. E.g. Starwars -> Star Wars")
+    }
     var i:Int = 1
     for(movies<-mov1Id) {
       println(i.toString+": "+movies._1+"; ID: " + movies._2)
@@ -344,7 +351,7 @@ class MovieCreator() {
   def lookUpMovie(movieString:String):ArrayBuffer[(String,Long)]={
     val movieAndId: ArrayBuffer[(String,Long)] = ArrayBuffer()
       for(movie<-titleMovie.values){
-        if(movie.Title contains movieString)
+        if(movie.Title.toLowerCase contains movieString.toLowerCase)
           movieAndId.append((movie.Title,movie.ID))
         }
      movieAndId
