@@ -1,18 +1,24 @@
 package MovieDatabaseAccess
 
+import java.io.{File, PrintWriter}
 import java.util.NoSuchElementException
 
 
-
-import org.apache.spark.graphx.lib.ShortestPaths
+import org.apache.spark.graphx.util.GraphGenerators
+import org.apache.spark.util.collection.{Sorter, PrimitiveVector}
 import org.apache.spark.{SparkContext, SparkConf}
 import org.apache.spark.graphx.{GraphLoader, Graph, Edge, VertexId}
-import org.apache.spark.rdd.RDD
 
 import scala.collection.mutable.ArrayBuffer
 import scala.io.Source
-import IncrementalSD.src.main.scala._
-import it.unipd.dei.graphx.diameter.Dijkstra
+
+
+import org.apache.spark.graphx._
+import org.apache.spark.rdd.RDD
+
+import org.apache.spark.storage.StorageLevel
+import org.apache.spark.{Logging, SparkContext}
+import org.apache.spark.graphx.impl.{EdgePartitionBuilder, GraphImpl}
 
 
 
@@ -20,13 +26,20 @@ import it.unipd.dei.graphx.diameter.Dijkstra
 object run {
 
   def main(args: Array[String]) {
-    val mov=new MovieCreator()
-    val graph=new GraphCreator(mov.Actors, mov.Genres, mov.map)
-    val g = graph.createGraph()
+    val mov = new MovieCreator()
+    val graphs = new GraphCreator(mov.Actors, mov.Genres, mov.map)
+    val graph = graphs.createGraph()
 
+    val sourceId = 166866
+    val destId = 47730
 
-
-
+    val a = graph.vertices.take(50)
+    for (b <- a)
+      print(b.toString)
+    val g = graph.mapVertices((id, _) =>
+      if (id == sourceId) Array(0.0, id)
+      else Array(Double.PositiveInfinity, id)
+    )
 
     val sssp = g.pregel(Array(Double.PositiveInfinity, -1))(
       (id, dist, newDist) => {
@@ -34,11 +47,9 @@ object run {
         else newDist
       },
       triplet => {
-
         if (triplet.srcAttr(0) + triplet.attr < triplet.dstAttr(0)) {
           Iterator((triplet.dstId, Array(triplet.srcAttr(0) + triplet.attr, triplet.srcId)))
         }
-
         else {
           Iterator.empty
         }
@@ -49,11 +60,44 @@ object run {
       }
     )
 
+
+    //while()
+    //val prev:RDD[Int] = sssp.vertices.map(vertex(destId))
+
+    val path:ArrayBuffer[Any] = ArrayBuffer()
+    val node = sssp.vertices.filter { case (id, _) => id == destId }.collect
+    path.append(destId)
+    var prev = node(0)._2(1)
+    path.append(prev)
+    while(prev !=sourceId ){
+      val node = sssp.vertices.filter { case (id, _) => id == prev }.collect
+      prev = node(0)._2(1)
+      path.append(prev)
+
+    }
+    for(a<-path){
+      println(a)
+    }
+
+
+
+    /*
+    val format_sssp: RDD[String] = sssp.vertices.map(vertex =>
+      "Vertex " + vertex._1 + ": distance is " + vertex._2(0) + ", previous node is Vertex " + vertex._2(1).toInt)
+    format_sssp.collect.foreach(println(_))
+
+
+
+    if (args.length > 2) {
+      val outputFileDir = args(2)
+      format_sssp.saveAsTextFile(outputFileDir)
+    }*/
+
   }
+
+
+
 }
-
-
-
 
 object Done extends Exception{
 
@@ -64,7 +108,7 @@ object NotArray extends Exception{
 }
 
 
- class GraphCreator(val actors:scala.collection.mutable.HashMap[String,Int], val genres:scala.collection.mutable.HashMap[String,Int], val movies:scala.collection.mutable.HashMap[String,Movie]){
+ class GraphCreator(val actors:scala.collection.mutable.HashMap[String,Int], val genres:scala.collection.mutable.HashMap[String,Int], val movies:scala.collection.mutable.HashMap[(String,Int),Movie]){
 
 
 
@@ -79,8 +123,8 @@ object NotArray extends Exception{
    val Actors = actors
    val Genres = genres
    val Movies = movies
-   val vertexArray: ArrayBuffer[(Long,String)] = ArrayBuffer()
-   val edgeArray:ArrayBuffer[Edge[Int]] = ArrayBuffer()
+   val vertexArray: ArrayBuffer[(Long,Array[Double])] = ArrayBuffer()
+   val edgeArray:ArrayBuffer[Edge[Double]] = ArrayBuffer()
 
 
 
@@ -90,38 +134,58 @@ object NotArray extends Exception{
 
 
 // TODO: Should possible be done in earlier stage, how to map given ID in Actors -> VertexID?
-  def createGraph(): Graph[String,Int] ={
+  def createGraph(): Graph[Array[Double], Double] ={
+  val pw = new PrintWriter(new File("graph.txt" ))
     for(movie<-this.Movies.values){
-      vertexArray.append((movie.ID,movie.Title))
+      vertexArray.append((movie.ID,Array(Double.PositiveInfinity,movie.ID)))
       val splitCast = movie.Cast.split(" ")
       for(cast<-splitCast)
-        vertexArray.append((cast.toLong,movie.Title))
+        vertexArray.append((cast.toLong,Array(Double.PositiveInfinity,movie.ID)))
       val splitGenre = movie.Genre.split(" ")
-      vertexArray.append((splitGenre(0).toLong,movie.Title))
-      createEdges(movie,splitCast,splitGenre)
+      vertexArray.append((splitGenre(0).toLong,Array(Double.PositiveInfinity,movie.ID)))
+      vertexArray.append((movie.Director.toLong,Array(Double.PositiveInfinity,movie.ID)))
+      createEdges(movie,splitCast,splitGenre,pw)
     }
 
 
     val V = vertexArray.toArray
     val E = edgeArray.toArray
-    val vertexRDD: RDD[(Long,String)] = sc.parallelize(V)
-    val edgeRDD: RDD[Edge[Int]] = sc.parallelize(E)
 
-    val graph: Graph[(String), Int] = Graph(vertexRDD, edgeRDD)
 
+    val vertexRDD: RDD[(VertexId,Array[Double])] = sc.parallelize(V)
+    val edgeRDD: RDD[Edge[Double]] = sc.parallelize(E)
+
+    val graph = Graph(vertexRDD,edgeRDD)
+
+
+
+
+    pw.close()
     return graph
 
   }
 
 
   //TODO: Link VertexId's
-  def createEdges(movie:Movie,splitCast:Array[String],splitGenre:Array[String]): Unit ={
-      for(cast<-splitCast){
-        edgeArray.append(Edge(movie.ID,cast.toLong,1))
-        edgeArray.append(Edge(cast.toLong,movie.ID,1))
-      }
-      edgeArray.append(Edge(movie.ID,splitGenre(0).toLong,3))
-      edgeArray.append(Edge(splitGenre(0).toLong,movie.ID,3))
+  def createEdges(movie:Movie,splitCast:Array[String],splitGenre:Array[String],pw:PrintWriter): Unit ={
+
+      edgeArray.append(Edge(movie.ID,splitCast(0).toLong,2))
+      pw.write(movie.ID + "\t" + splitCast(0) + "\t" + "1" + "\n")
+      edgeArray.append(Edge(splitCast(0).toLong,movie.ID,2*(10-(movie.getimdbRating.toDouble))))
+      pw.write( splitCast(0).toLong + "\t" + movie.ID + "\t" + "1" + "\n")
+
+      edgeArray.append(Edge(movie.ID,movie.Director.toLong,1))
+      pw.write(movie.ID + "\t" + movie.Director + "\t" + "1" + "\n")
+      edgeArray.append(Edge(movie.Director.toLong,movie.ID,1*(10-(movie.getimdbRating.toDouble))))
+      pw.write( movie.Director.toLong + "\t" + movie.ID + "\t" + "1" + "\n")
+
+
+      edgeArray.append(Edge(movie.ID,splitGenre(0).toLong,100))
+      pw.write(movie.ID + "\t" + splitGenre(0).toLong + "\t" + "3" + "\n")
+      edgeArray.append(Edge(splitGenre(0).toLong,movie.ID,100*(10-(movie.getimdbRating.toDouble))))
+      pw.write( splitGenre(0).toLong + "\t" + movie.ID + "\t" + "3" + "\n")
+
+
     }
 
 
@@ -135,14 +199,18 @@ object NotArray extends Exception{
 
 
 
+
 class MovieCreator() {
-  var map = scala.collection.mutable.HashMap.empty[String, Movie]
+  var map = scala.collection.mutable.HashMap.empty[(String,Int), Movie]
   var Genres = scala.collection.mutable.HashMap.empty[String, Int]
   var Actors = scala.collection.mutable.HashMap.empty[String, Int]
+  var Directors = scala.collection.mutable.HashMap.empty[String, Int]
   var i: Int = 0
   var id = 0;
-  var key1: String = ""
-  var key2: String = ""
+  var key1: (String, Int) = ("",0)
+  var key2: (String, Int) =("",0)
+  var key3: (String, Int) = ("",0)
+  var key4: (String, Int) = ("",0)
   addMovieAttributes()
   splitAndIndexize()
 
@@ -154,7 +222,7 @@ class MovieCreator() {
     try{
         if((liist(12).toDouble>5)&&(liist(13).toDouble>1000)) // IMDB RATING / VOTE
 
-          this.map += (liist(2) -> new Movie(liist,id.toLong))
+          this.map += ((liist(2),id) -> new Movie(liist,id.toLong))
           id = id+1
 
     }
@@ -197,6 +265,20 @@ class MovieCreator() {
                   }
 
               }
+      val splitDir = movie.Director.split(", ")
+      try{
+        var index = Directors(splitDir(0))
+        movie.Director = index.toString
+      } catch{case noSuchElementException: NoSuchElementException =>
+        j += 1
+        this.Directors += (splitDir(0) -> j)
+        movie.Director =  j.toString
+
+      }
+
+
+
+
       }
     }
 
@@ -206,11 +288,15 @@ class MovieCreator() {
   ///### Pre-Proc TESTPRINTING ###
   try {
     for (key <- map.keys) {
-      if ((key contains "Batman") && !(key1 contains "Batman Begins"))
+      if(key._2 == 283039.toLong)
+        key3 = key
+      if(key._2 == 253955.toLong)
+        key4 = key
+      if ((key._1 contains "Batman") && !(key1._1 contains "Batman Begins"))
         key1 = key
-      if ((key contains "Lord of") && !(key2 contains "Making"))
+      if ((key._1 contains "Lord of") && !(key2._1 contains "Making"))
         key2 = key
-      if ((key1 contains "Batman Begins") && (key2 contains "Lord of")) throw Done
+     // if ((key1._1 contains "Batman Begins") && (key2._1 contains "Lord of")) throw Done
     }
   } catch {
     case Done =>
@@ -218,17 +304,24 @@ class MovieCreator() {
 
   ///###TESTPRINTING###
   val time1: Long = System.currentTimeMillis()
-  try{val a: Movie = map("Miss Jerry")
-  print("Title: \n" + a.getTitle + "\n" + "Genre: \n" + a.getGenre + "\n" + "Director: \n" + a.getDirector+ "\n" +"Cast: \n" + a.getCast)
-  print("\n\n")}
-  catch {case noSuchElementException: NoSuchElementException => }
   try{
   val b: Movie = map(key1)
-  print("Title: " + b.getTitle + "\n" + "Genre: " + b.getGenre + "\n" + "Director: \n" + b.getDirector+ "\n" +"Cast: \n" + b.getCast)
+  print("Title: " + b.getTitle + "\n" + "Genre: " + b.getGenre + "\n" + "Director: \n" + b.getID+ "\n" +"Cast: \n" + b.getCast)
   print("\n\n")}
   catch {case noSuchElementException: NoSuchElementException => }
+
   val c: Movie = map(key2)
-  print("Title: " + c.getTitle + "\n" + "Genre: " + c.getGenre + "\n" + "Director: \n" + c.getDirector + "\n" +"Cast: \n" + c.getCast)
+  print("Title: " + c.getTitle + "\n" + "Genre: " + c.getGenre + "\n" + "Director: \n" + c.getID + "\n" +"Cast: \n" + c.getCast)
+  print("\n\n")
+
+
+  val d: Movie = map(key3)
+  print("Title: " + d.getTitle + "\n" + "Genre: " + d.getGenre + "\n" + "Director: \n" + d.getID + "\n" +"Cast: \n" + d.getCast)
+  print("\n\n")
+
+
+  val e: Movie = map(key4)
+  print("Title: " + e.getTitle + "\n" + "Genre: " + e.getGenre + "\n" + "Director: \n" + e.getID + "\n" +"Cast: \n" + e.getCast)
   print("\n\n")
   for(i <- Genres)
     print(i + "\n")
@@ -248,7 +341,7 @@ class Movie(list:Array[String], Id:Long){//, vertex: VertexId) {
   val Runtime = list(5)
   var Genre = list(6)
   val Released = list(7)
-  val Director = list(8)
+  var Director = list(8)
   val Writer = list(9)
   var Cast = list(10)
   val Metacritic = list(11)
@@ -284,8 +377,8 @@ class Movie(list:Array[String], Id:Long){//, vertex: VertexId) {
   def getDirector: String ={
     Director
   }
-  def getWriter: String ={
-    Writer
+  def getID: Long ={
+    ID
   }
 
 }
