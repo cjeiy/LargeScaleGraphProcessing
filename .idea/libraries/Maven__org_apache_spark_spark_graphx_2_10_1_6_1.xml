@@ -1,0 +1,14 @@
+<component name="libraryTable">
+  <library name="Maven: org.apache.spark:spark-graphx_2.10:1.6.1">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/apache/spark/spark-graphx_2.10/1.6.1/spark-graphx_2.10-1.6.1.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/org/apache/spark/spark-graphx_2.10/1.6.1/spark-graphx_2.10-1.6.1-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/apache/spark/spark-graphx_2.10/1.6.1/spark-graphx_2.10-1.6.1-sources.jar!/" />
+      <root url="file://$PROJECT_DIR$/../sjtu-iiot-graphx-algorithm-ad514af/src/main/scala" />
+    </SOURCES>
+  </library>
+</component>

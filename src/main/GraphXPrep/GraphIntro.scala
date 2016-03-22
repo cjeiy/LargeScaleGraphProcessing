@@ -16,6 +16,7 @@ object GraphIntro {
 
   val sc = new SparkContext(configuration)
 
+
   val vertexArray = Array(
     (1L, ("Alice", 28)),
     (2L, ("Bob", 27)),
@@ -25,8 +26,8 @@ object GraphIntro {
     (6L, ("Fran", 50))
   )
 
-  val edgeArray = Array(
-    Edge(2L, 1L, 7),
+  val edgeArray: Array[Edge[PartitionID]] = Array(
+    Edge(3L, 1L, 7),
     Edge(2L, 4L, 2),
     Edge(3L, 2L, 4),
     Edge(3L, 6L, 3),
