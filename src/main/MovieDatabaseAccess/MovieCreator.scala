@@ -43,13 +43,13 @@ class MovieCreator() {
     val liist = line.split("\t")
 
     try{
-        if((liist(12).toDouble>5)&&(liist(13).toDouble>1000)) // IMDB RATING / VOTE
-
-          this.titleMovie += (liist(2) -> new Movie(liist,id.toLong))
-          this.idMovie += (id -> new Movie(liist,id.toLong))
+        if((liist(12).toDouble>6)&&(liist(13).toDouble>5000 )){ // IMDB RATING / VOTE
+          var temp_mov:Movie = new Movie(liist,id.toLong)
+          this.titleMovie += (liist(2) -> temp_mov)
+          this.idMovie += (id -> temp_mov)
           id = id+1
 
-    }
+    }}
     catch {
       case ioob: IndexOutOfBoundsException => print(ioob)
       case nfe: NumberFormatException => //if (!(liist(12).isEmpty) || (!(liist(13).isEmpty ))){print(nfe)}
@@ -90,13 +90,16 @@ class MovieCreator() {
 
               }
       val splitDir = movie.Director.split(", ")
-      try{
+      movie.Director = ""
+        try{
         var index = Directors(splitDir(0))
-        movie.Director = index.toString
+
+        movie.Director = movie.Director + index
       } catch{case noSuchElementException: NoSuchElementException =>
-        j += 1
+
         this.Directors += (splitDir(0) -> j)
         movie.Director =  j.toString
+        j += 1
 
       }
 

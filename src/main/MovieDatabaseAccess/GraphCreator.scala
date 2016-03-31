@@ -112,20 +112,20 @@ class GraphCreator(val actors:scala.collection.mutable.HashMap[String,Int], val 
   //TODO: Link VertexId's
   def createEdges(movie:Movie,splitCast:Array[String],splitGenre:Array[String],pw:PrintWriter): Unit ={
 
-    edgeArray.append(Edge(movie.ID,splitCast(0).toLong,2))
+    edgeArray.append(Edge(movie.ID,splitCast(0).toLong,2*(5- movie.getimdbRating.toDouble/2)))
     pw.write(movie.ID + "\t" + splitCast(0) + "\t" + "1" + "\n")
-    edgeArray.append(Edge(splitCast(0).toLong,movie.ID,2*(10- movie.getimdbRating.toDouble)))
+    edgeArray.append(Edge(splitCast(0).toLong,movie.ID,2*(5- movie.getimdbRating.toDouble/2)))
     pw.write( splitCast(0).toLong + "\t" + movie.ID + "\t" + "1" + "\n")
 
-    edgeArray.append(Edge(movie.ID,movie.Director.toLong,1))
+    edgeArray.append(Edge(movie.ID,movie.Director.toLong,1*(5- movie.getimdbRating.toDouble/2)))
     pw.write(movie.ID + "\t" + movie.Director + "\t" + "1" + "\n")
-    edgeArray.append(Edge(movie.Director.toLong,movie.ID,1*(10- movie.getimdbRating.toDouble)))
+    edgeArray.append(Edge(movie.Director.toLong,movie.ID,1*(5- movie.getimdbRating.toDouble/2)))
     pw.write( movie.Director.toLong + "\t" + movie.ID + "\t" + "1" + "\n")
 
 
-    edgeArray.append(Edge(movie.ID,splitGenre(0).toLong,100))
+    edgeArray.append(Edge(movie.ID,splitGenre(0).toLong,6*(5- movie.getimdbRating.toDouble/2)))
     pw.write(movie.ID + "\t" + splitGenre(0).toLong + "\t" + "3" + "\n")
-    edgeArray.append(Edge(splitGenre(0).toLong,movie.ID,100*(10- movie.getimdbRating.toDouble)))
+    edgeArray.append(Edge(splitGenre(0).toLong,movie.ID,6*(5- movie.getimdbRating.toDouble/2)))
     pw.write( splitGenre(0).toLong + "\t" + movie.ID + "\t" + "3" + "\n")
 
 
