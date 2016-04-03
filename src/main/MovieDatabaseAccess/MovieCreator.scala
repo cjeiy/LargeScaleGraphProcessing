@@ -4,6 +4,7 @@ import java.io.{File, PrintWriter}
 import java.util.NoSuchElementException
 
 
+import GUI.ViewTest
 import MovieDatabaseAcess.{Done, Movie}
 import org.apache.spark.graphx.util.GraphGenerators
 import org.apache.spark.util.collection.{Sorter, PrimitiveVector}
@@ -21,10 +22,10 @@ import org.apache.spark.storage.StorageLevel
 import org.apache.spark.{Logging, SparkContext}
 import org.apache.spark.graphx.impl.{EdgePartitionBuilder, GraphImpl}
 
+import scalafx.collections.ObservableBuffer
 
 
-
-class MovieCreator() {
+class MovieCreator(v:ViewTest) {
   var idMovie = scala.collection.mutable.HashMap.empty[Int, Movie]
   var titleMovie = scala.collection.mutable.HashMap.empty[String, Movie]
   var Genres = scala.collection.mutable.HashMap.empty[String, Int]
@@ -32,8 +33,11 @@ class MovieCreator() {
   var Directors = scala.collection.mutable.HashMap.empty[String, Int]
   var i: Int = 0
   var id = 0
+  val ViewTest = v
   var key1: String = ""
   var key2: String =""
+  var movieString1 = ArrayBuffer.empty[(String,Long)]
+  var movieString2 = ArrayBuffer.empty[(String,Long)]
   addMovieAttributes()
   splitAndIndexize()
 
@@ -108,6 +112,29 @@ class MovieCreator() {
 
       }
     }
+
+  def findMovieIdX(movieString:String,a:Int): Unit ={
+    var movId = ArrayBuffer.empty[(String,Long)]
+    println(movieString)
+
+    while(movId.isEmpty){
+      movId = this.lookUpMovie(movieString)
+  }
+    val names = ObservableBuffer.empty[String]
+    for(a<-movId){
+      names+=a._1
+
+    }
+    names.sort()
+    if(a==1){
+      println("Hej")
+      for(a<-names)
+        println(a)
+      ViewTest.combobox1.items=names
+    }
+    else
+      ViewTest.combobox2.items=names
+  }
 
   def findMovieId(a:Int): Int ={
     var mov1Id = ArrayBuffer.empty[(String,Long)]

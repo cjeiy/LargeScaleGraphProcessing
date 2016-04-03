@@ -1,5 +1,12 @@
+package GUI
+
+import MovieDatabaseAccess.MovieCreator
+import MovieDatabaseAcess.Main
+import org.apache.hadoop.yarn.api.protocolrecords.GetQueueUserAclsInfoRequest
 import event_filters.DraggablePanelsExample._
 
+
+import scala.collection.mutable.ArrayBuffer
 import scalafx.Includes._
 import scalafx.application.JFXApp
 import scalafx.collections.ObservableBuffer
@@ -11,31 +18,97 @@ import scalafx.scene.{Node, Scene}
 import scalafx.scene.paint.Color
 import scalafx.scene.shape.Rectangle
 
-class KL(){
+class Graphics(){
 
         def main(args: Array[String]) {
-                 ViewTest
+                 val v:ViewTest = new ViewTest
         }
 }
 
-object ViewTest extends JFXApp {
 
-  val testImage = new ImageView(new Image("http://g-ecx.images-amazon.com/images/G/01/img15/pet-products/small-tiles/23695_pets_vertical_store_dogs_small_tile_8._CB312176604_.jpg")) {
+class ViewTest() extends JFXApp {
+
+
+  var flag = true
+
+  var mov1Choices = ObservableBuffer("hej","hejja")
+  var mov2Choices = ObservableBuffer("jarra","nejjra")
+
+  var movRecs = ArrayBuffer.empty[String]
+  var actRecs = ArrayBuffer.empty[String]
+  var dirRecs = ArrayBuffer.empty[String]
+
+  val mov = Main.getMov()
+  val TextFieldOne = new TextField() {
+    prefColumnCount = 10
+    promptText = "Movie1"
+  }
+
+  val TextFieldTwo = new TextField() {
+    prefColumnCount = 10
+    promptText = "Movie2"
+  }
+
+  val combobox1 = new ComboBox[String]{
+    maxWidth = 400
+    minWidth = 300
+    promptText = "Make a choice..."
+    items = mov1Choices
+  }
+
+  val combobox2 = new ComboBox[String]{
+    maxWidth = 400
+    minWidth = 300
+    promptText = "Make a choice..."
+    items = mov2Choices
+  }
+
+
+
+
+  val actors = new Label("\n\n\n")
+  val directors = new Label("\n\n\n")
+  val image1Text = new Label("\n\n\n")
+  val image2Text = new Label("\n\n\n")
+  val image3Text = new Label("\n\n\n")
+  val image4Text = new Label("\n\n\n")
+
+  val image1 = new ImageView(new Image("http://www.clker.com/cliparts/8/D/k/N/g/r/white-dollar-sign-2-md.png")) {
     // One can resize image without preserving ratio between height and width
-    fitHeight = 140
+    fitHeight = 400
+    preserveRatio = true
+    // The usage of the better filter
+    smooth = true
+  }
+  val image2 = new ImageView(new Image("http://www.clker.com/cliparts/8/D/k/N/g/r/white-dollar-sign-2-md.png")) {
+    // One can resize image without preserving ratio between height and width
+    fitHeight = 400
+    preserveRatio = true
+    // The usage of the better filter
+    smooth = true
+  }
+  val image3 = new ImageView(new Image("http://www.clker.com/cliparts/8/D/k/N/g/r/white-dollar-sign-2-md.png")) {
+    // One can resize image without preserving ratio between height and width
+    fitHeight = 400
+    preserveRatio = true
+    // The usage of the better filter
+    smooth = true
+  }
+  val image4 = new ImageView(new Image("http://www.clker.com/cliparts/8/D/k/N/g/r/white-dollar-sign-2-md.png")) {
+    // One can resize image without preserving ratio between height and width
+    fitHeight = 400
     preserveRatio = true
     // The usage of the better filter
     smooth = true
   }
 
-
+  val images =Seq()
   private val borderStyle = "" +
     "-fx-background-color: white;" +
     "-fx-border-color: black;" +
     "-fx-border-width: 1;" +
     "-fx-border-radius: 6;" +
     "-fx-padding: 6;"
-
 
   stage = new JFXApp.PrimaryStage() {
 
@@ -47,8 +120,8 @@ object ViewTest extends JFXApp {
       children = Seq(loginPanel)
       alignmentInParent = Pos.TopLeft
     }
-    title = "Draggable Panels Example"
-    scene = new Scene(400, 300) {
+    title = "Movie Recommendation"
+    scene = new Scene(1300, 700) {
       root = new BorderPane() {
         center = panelsPane
       }
@@ -59,33 +132,65 @@ object ViewTest extends JFXApp {
 
 
 
-  private def doSomething(a:String): Unit ={
 
-    testImage.setImage(new Image("https://www.petfinder.com/wp-content/uploads/2012/11/140272627-grooming-needs-senior-cat-632x475.jpg"))
-    println("GoGo!" + a)
+
+  private def updateImages(): Unit ={
+    val size = movRecs.size
+    var actorsString: String = "Recommended Actors: \n"
+    for(a<-actRecs){ actorsString += a+ "\n" }
+    var dirString: String = "Recommended Directors: \n"
+    for(a<-dirRecs){ dirString += a+ "\n" }
+
+    actors.setText(actorsString)
+    directors.setText(dirString)
+
+
+    if (size>=1){
+      image1.setImage(new Image(url = mov.titleMovie(movRecs(0)).Poster))
+      image1Text.setText(mov.titleMovie(movRecs(0)).Title +"\n"
+         +"Imdb Score: "+ mov.titleMovie(movRecs(0)).imdbRating + "\n" + "Released: "+mov.titleMovie(movRecs(0)).Year )}
+    if (size>=2){
+      image2.setImage(new Image(url = mov.titleMovie(movRecs(1)).Poster))
+      image2Text.setText(mov.titleMovie(movRecs(1)).Title +"\n"
+        +"Imdb Score: "+ mov.titleMovie(movRecs(1)).imdbRating + "\n" + "Released: "+mov.titleMovie(movRecs(1)).Year )}
+    if (size>=3){
+      image3.setImage(new Image(url = mov.titleMovie(movRecs(2)).Poster))
+      image3Text.setText(mov.titleMovie(movRecs(2)).Title +"\n"
+        +"Imdb Score: "+ mov.titleMovie(movRecs(2)).imdbRating + "\n" + "Released: "+mov.titleMovie(movRecs(2)).Year )}
+    if (size>=4){
+      image4.setImage(new Image(url = mov.titleMovie(movRecs(3)).Poster))
+      image4Text.setText(mov.titleMovie(movRecs(3)).Title +"\n"
+        +"Imdb Score: "+ mov.titleMovie(movRecs(3)).imdbRating + "\n" + "Released: "+mov.titleMovie(movRecs(3)).Year )}
+
+
+
   }
   private def createLoginPanel(): Node = {
     val toggleGroup1 = new ToggleGroup()
 
-    val textField = new TextField() {
-      prefColumnCount = 10
-      promptText = "Movie1"
-    }
-
-    val passwordField = new TextField()() {
-      prefColumnCount = 10
-      promptText = "Movie2"
-    }
-
-
 
     new VBox(6) {
-      children = Seq(testImage,
+      children = Seq(
+        new HBox(2){
+          children = Seq(
+
+            new VBox(2){
+            children= Seq(image1,image1Text)},
+
+            new VBox(2){
+              children= Seq(image2,image2Text)},
+
+            new VBox(2){
+                children= Seq(image3,image3Text)},
+
+            new VBox(2){
+                  children= Seq(image4,image4Text)}
+          )},
 
         new HBox(2){
           children = Seq(
 
-
+/*
           new VBox(2) {
             children = Seq(
               new RadioButton("IMDB>5") {
@@ -104,19 +209,52 @@ object ViewTest extends JFXApp {
                 selected = false
               }
             )
-          },
+          },*/
         new VBox(2) {
-          children = Seq(textField, passwordField)
+          children = Seq(
+            new HBox(2){
+              children = Seq(TextFieldOne,
+              new Button("Search"){
+                onAction = handle{ mov.findMovieIdX(TextFieldOne.text(),1)}
+              }, combobox1
+              )}, new HBox(2){
+              children = Seq(TextFieldTwo,
+                new Button("Search"){
+                  onAction = handle{ mov.findMovieIdX(TextFieldTwo.text(),2)}
+                },combobox2
+              )})
         },
         new HBox(2){
           children = Seq(
           new Button("Recommend Me!"){
-            onAction =handle{ doSomething(toggleGroup1.getSelectedToggle.getUserData.toString)}
+            onAction =handle{
+              new Thread(new Runnable {
+                def run() {
+                  val ret = Main.graphRun(combobox1.getValue,combobox2.getValue)
+                  mov.ViewTest.movRecs = ret._1
+                  mov.ViewTest.actRecs = ret._2
+                  mov.ViewTest.dirRecs = ret._3
+                  mov.ViewTest.flag = false
+                }
+              }).start()
+
+              while(mov.ViewTest.flag){
+
+                Thread.sleep(100)
+              }
+              updateImages()
+              mov.ViewTest.flag = true
+
+              } //
           }
           )
-        }
+
+
+            }
           )
-        }
+        },
+    new HBox(100){
+      children = Seq(actors, directors)}
       )
 
       alignment = Pos.BottomLeft
@@ -124,5 +262,6 @@ object ViewTest extends JFXApp {
 
 
   }}
+
 
         }
