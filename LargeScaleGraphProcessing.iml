@@ -30,7 +30,11 @@
     <orderEntry type="library" name="Maven: com.github.fommil.netlib:core:1.1.2" level="project" />
     <orderEntry type="library" name="Maven: net.sourceforge.f2j:arpack_combined_all:0.1" level="project" />
     <orderEntry type="library" name="Maven: org.spark-project.spark:unused:1.0.0" level="project" />
+    <orderEntry type="library" name="Maven: net.liftweb:lift-json:2.0" level="project" />
+    <orderEntry type="library" name="Maven: com.thoughtworks.paranamer:paranamer:2.0" level="project" />
+    <orderEntry type="library" name="Maven: org.scalaj:scalaj-http_2.10:2.3.0" level="project" />
     <orderEntry type="library" name="Maven: it.unipd.dei:graphx-diameter_2.11:0.1.0" level="project" />
+    <orderEntry type="library" name="Maven: net.ettinsmoor:bingerator_2.10:0.2.2" level="project" />
     <orderEntry type="library" name="Maven: org.apache.spark:spark-core_2.10:1.6.0" level="project" />
     <orderEntry type="library" name="Maven: org.apache.avro:avro-mapred:hadoop2:1.7.7" level="project" />
     <orderEntry type="library" name="Maven: org.apache.avro:avro-ipc:1.7.7" level="project" />
@@ -148,7 +152,6 @@
     <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-databind:2.4.4" level="project" />
     <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-core:2.4.4" level="project" />
     <orderEntry type="library" name="Maven: com.fasterxml.jackson.module:jackson-module-scala_2.10:2.4.4" level="project" />
-    <orderEntry type="library" name="Maven: com.thoughtworks.paranamer:paranamer:2.6" level="project" />
     <orderEntry type="library" name="Maven: org.apache.ivy:ivy:2.4.0" level="project" />
     <orderEntry type="library" name="Maven: oro:oro:2.0.8" level="project" />
     <orderEntry type="library" name="Maven: org.tachyonproject:tachyon-client:0.8.2" level="project" />

@@ -44,21 +44,21 @@ class MovieCreator(v:ViewTest) {
 
   def addMovieAttributes(): Unit = {
   for (line <- Source.fromFile("src\\main\\resources\\omdbMovies.txt", "iso-8859-1").getLines()) {
-    val liist = line.split("\t")
+    val attributeList = line.split("\t")
 
     try{
-        if((liist(12).toDouble>6)&&(liist(13).toDouble>5000 )){ // IMDB RATING / VOTE
-          var temp_mov:Movie = new Movie(liist,id.toLong)
-          this.titleMovie += (liist(2) -> temp_mov)
+        if((attributeList(12).toDouble>6)&&(attributeList(13).toDouble>5000 )){ // IMDB RATING / VOTE
+          var temp_mov:Movie = new Movie(attributeList,id.toLong)
+          this.titleMovie += (attributeList(2) -> temp_mov)
           this.idMovie += (id -> temp_mov)
           id = id+1
 
     }}
     catch {
       case ioob: IndexOutOfBoundsException => print(ioob)
-      case nfe: NumberFormatException => //if (!(liist(12).isEmpty) || (!(liist(13).isEmpty ))){print(nfe)}
+      case nfe: NumberFormatException => //if (!(attributeList(12).isEmpty) || (!(attributeList(13).isEmpty ))){print(nfe)}
     }
-    }
+    } 
   }
 
   def splitAndIndexize(): Unit = {

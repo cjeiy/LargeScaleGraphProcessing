@@ -30,6 +30,7 @@ class ViewTest() extends JFXApp {
 
 
   var flag = true
+  val bingImageAccess = new BingImageAccess
 
   var mov1Choices = ObservableBuffer("hej","hejja")
   var mov2Choices = ObservableBuffer("jarra","nejjra")
@@ -101,6 +102,20 @@ class ViewTest() extends JFXApp {
     // The usage of the better filter
     smooth = true
   }
+  val imageActor = new ImageView(new Image("http://www.clker.com/cliparts/8/D/k/N/g/r/white-dollar-sign-2-md.png")) {
+    // One can resize image without preserving ratio between height and width
+    fitHeight = 150
+    preserveRatio = true
+    // The usage of the better filter
+    smooth = true
+  }
+  val imageDir = new ImageView(new Image("http://www.clker.com/cliparts/8/D/k/N/g/r/white-dollar-sign-2-md.png")) {
+    // One can resize image without preserving ratio between height and width
+    fitHeight = 150
+    preserveRatio = true
+    // The usage of the better filter
+    smooth = true
+  }
 
   val images =Seq()
   private val borderStyle = "" +
@@ -149,18 +164,40 @@ class ViewTest() extends JFXApp {
       image1.setImage(new Image(url = mov.titleMovie(movRecs(0)).Poster))
       image1Text.setText(mov.titleMovie(movRecs(0)).Title +"\n"
          +"Imdb Score: "+ mov.titleMovie(movRecs(0)).imdbRating + "\n" + "Released: "+mov.titleMovie(movRecs(0)).Year )}
+    else{
+      image1.setImage(new Image(url = "http://www.clker.com/cliparts/8/D/k/N/g/r/white-dollar-sign-2-md.png"))
+      image1Text.setText("")
+    }
+
     if (size>=2){
       image2.setImage(new Image(url = mov.titleMovie(movRecs(1)).Poster))
       image2Text.setText(mov.titleMovie(movRecs(1)).Title +"\n"
         +"Imdb Score: "+ mov.titleMovie(movRecs(1)).imdbRating + "\n" + "Released: "+mov.titleMovie(movRecs(1)).Year )}
+    else{
+      image2.setImage(new Image(url = "http://www.clker.com/cliparts/8/D/k/N/g/r/white-dollar-sign-2-md.png"))
+      image2Text.setText("")}
     if (size>=3){
       image3.setImage(new Image(url = mov.titleMovie(movRecs(2)).Poster))
       image3Text.setText(mov.titleMovie(movRecs(2)).Title +"\n"
         +"Imdb Score: "+ mov.titleMovie(movRecs(2)).imdbRating + "\n" + "Released: "+mov.titleMovie(movRecs(2)).Year )}
+    else{
+      image3.setImage(new Image(url = "http://www.clker.com/cliparts/8/D/k/N/g/r/white-dollar-sign-2-md.png"))
+      image3Text.setText("")}
     if (size>=4){
       image4.setImage(new Image(url = mov.titleMovie(movRecs(3)).Poster))
       image4Text.setText(mov.titleMovie(movRecs(3)).Title +"\n"
         +"Imdb Score: "+ mov.titleMovie(movRecs(3)).imdbRating + "\n" + "Released: "+mov.titleMovie(movRecs(3)).Year )}
+    else{
+      image4.setImage(new Image(url = "http://www.clker.com/cliparts/8/D/k/N/g/r/white-dollar-sign-2-md.png"))
+      image4Text.setText("")
+    }
+
+    val actorIm = bingImageAccess.getImage(mov.ViewTest.actRecs(0))
+    val dirI = bingImageAccess.getImage(mov.ViewTest.dirRecs(0))
+    imageActor.setImage(new Image(url = actorIm))
+    imageDir.setImage(new Image(url = dirI))
+
+
 
 
 
@@ -240,7 +277,7 @@ class ViewTest() extends JFXApp {
 
               while(mov.ViewTest.flag){
 
-                Thread.sleep(100)
+                Thread.sleep(10)
               }
               updateImages()
               mov.ViewTest.flag = true
@@ -254,7 +291,11 @@ class ViewTest() extends JFXApp {
           )
         },
     new HBox(100){
-      children = Seq(actors, directors)}
+      children = Seq(
+        new VBox(10){
+          children=Seq(imageActor,actors)},
+        new VBox(10){
+          children = Seq(imageDir,directors)})}
       )
 
       alignment = Pos.BottomLeft
